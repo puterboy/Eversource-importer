@@ -260,7 +260,7 @@ today's data). Drag or compress/expand the shaded box under the axis to
 change the viewport.
 
 !\[Eversource Energy
-Dashboard\]((https://github.com/puterboy/Eversource-importer/eversourceimporter/images/eversource-dashboard.png)
+Dashboard\](https://github.com/puterboy/Eversource-importer/blob/main/eversoureimporter/images/eversource-dashboard.png)
 
 ```
 title: Electricity
