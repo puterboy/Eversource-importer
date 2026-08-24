@@ -1,0 +1,52 @@
+---
+name: "Eversource Energy Downloader and Importer"
+description: >-
+  Import Eversource historical quarter-hour energy usage into Home Assistant
+  - Every quarter hour, create placeholder state entry with state 'unknown' for later fill
+  - Every X hours, scrape and download new Eversource energy website.
+  - If new data, import into states table and update statistics
+  (Jeff Kosowsky, Copyright 2026)
+version: "0.9.0"
+slug: "eversourceimporter"
+url: https://github.com/puterboy/Eversource-importer/tree/main/eversourceimporter
+
+arch:
+  - aarch64
+  - amd64
+
+apparmor: false
+init: false
+homeassistant_api: true
+
+map:
+  - homeassistant_config:rw
+
+privileged:
+  - SYS_ADMIN
+
+options:
+  user_eversource: null
+  passwd_eversource: null
+  account_eversource: ""
+  energy_file: "/homeassistant/eversource.csv"
+  days_back: 7
+  download_start: 1
+  download_frequency: 4
+  energy_sensor: null
+  donor_sensors: null
+  offset: -15
+
+schema:
+  user_eversource: str
+  passwd_eversource: password
+  account_eversource: str?
+  energy_file: str
+  days_back: "int(1,)"
+  download_start: "int(0,23)"
+  download_frequency: "int(1,24)"
+  energy_sensor: "match(^[a-z0-9_]+\\.[a-z0-9_]+$)"
+  donor_sensors: 'match(^$|^[a-z_][a-z0-9_]*\.[a-z0-9_]+([[:space:]]*,[[:space:]]*[a-z_][a-z0-9_]*\.[a-z0-9_]+)*)'
+  offset: int
+
+translations:
+  - en

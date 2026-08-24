@@ -1,0 +1,67 @@
+---
+exclude: ^$
+repos:
+  - repo: https://github.com/executablebooks/mdformat
+    # Do this before other tools "fixing" the line endings
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        name: Format Markdown
+        entry: mdformat  # Executable to run, with fixed options
+        language: python
+        types: [markdown]
+        args: [--wrap, '75', --number]
+        additional_dependencies:
+          - mdformat-toc
+          - mdformat-gfm
+          - mdformat-beautysh
+          - setuptools
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # - id: no-commit-to-branch
+      #  args: [--branch, main]
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+#JJK        exclude: .*\.md$
+      - id: check-json
+#JJK        exclude: ^eversourceimporter/xxxxx\.json$ #JJK
+      - id: mixed-line-ending
+      - id: check-builtin-literals
+        args: [--ignore=dict]
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+#JJK        exclude: ^(test/.*)$
+        exclude: ^examples/.*$
+      - id: fix-byte-order-marker
+      - id: check-case-conflict
+  - repo: https://github.com/lovesegfault/beautysh.git
+    rev: v6.2.1
+    hooks:
+      - id: beautysh
+        additional_dependencies:
+#JJK          - setuptools
+        - setuptools<81
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+#JJK: Added below:
+  - repo: local
+    hooks:
+      - id: sync-readme-jjk
+        name: Sync README files (JJK)
+        entry: /usr/bin//gh workflow run "Sync README Files (JJK)"
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push, commit]          # or [pre-commit] if you prefer it earlier

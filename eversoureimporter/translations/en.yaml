@@ -1,0 +1,33 @@
+---
+configuration:
+  user_eversource:
+    name: "Eversource Email or Username"
+    description: "Email address or username you use to login to your Eversource account (https://www.eversource.com/security/account/login)"
+  passwd_eversource:
+    name: "Eversource Password"
+    description: "Eversource account login password."
+  account_eversource:
+    name: "Eversource Account Number [Optional]"
+    description: "Eversource account number. Typically, only needed if you have more than one account and the desired one is not the default."
+  energy_file:
+    name: "Energy Download CSV File"
+    description: "File path and name to save the (cumulative) raw downloaded Eversource energy csv data file. If no absolute path given, then prepend '/homeassistant'"
+  days_back:
+    name: "Start Days Back"
+    description: "Number of days ago to start searching for new energy data to download and import (must be a positive number). [default: 7 days]"
+  download_start:
+    name: "Download Start (hours)"
+    description: "Start first attempted download this many hours after midnight local time [default: 1 hour]"
+  download_frequency:
+    name: "Download Frequency (hours)"
+    description: "Attempt to download energy data every N hours (where N=1-23), starting at 'Download Start' hours after midnight. [default: 4 hours]"
+  energy_sensor:
+    name: "Energy Sensor Entity Id"
+    description: "Entity id for the energy data that you are downloading. Should have 'state_class: measurement', 'unit of measurement: kWh' and 'device_class: energy'"
+  donor_sensors:
+    name: "Donor Sensors [Optional]"
+    description: "Comma-separated list of entity_id's that can be retrospectively repurposed and used as placeholders for energy sensor states if no placeholder already exists for a given bucket."
+  offset:
+    name: "Bucket Offset"
+    description: "Number of seconds from end of quarter-hour bucket to insert placeholders. Should generally be negative integer so that time buckets align properly [default: -15 seconds]"
+   
