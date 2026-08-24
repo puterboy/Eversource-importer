@@ -283,7 +283,7 @@ def log(level: int, verbose: int, message: str) -> None:
         logging.info(message)
 
 def fmt_ts(ts: float, no_sec: bool = False) -> str:
-    """Return a human-readable local timestamp string."""    
+    """Return a human-readable local timestamp string."""
     dt = datetime.fromtimestamp(ts, tz=LOCAL_TZ)
     if no_sec:
         return dt.strftime("%Y-%m-%d %H:%M %Z")

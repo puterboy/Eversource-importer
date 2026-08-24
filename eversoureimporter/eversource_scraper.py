@@ -247,7 +247,7 @@ def native_to_unix(path: str) -> str:
     ).strip()
 
 # --------------------------------------------------------------------------
-# Global variable initalization
+# Global variable initialization
 # --------------------------------------------------------------------------
 def initialize_globals() -> None:
     """Parse/validate arguments and prepare global configuration."""
@@ -291,7 +291,7 @@ def initialize_globals() -> None:
     today = datetime.today()
     if args.start is not None:  # Start date option takes precedence
         START_DATE = (today - timedelta(days=args.start)).strftime("%m/%d/%Y")
-    elif LAST_DATE is not None:  # Then date from ouput file if it exists
+    elif LAST_DATE is not None:  # Then date from output file if it exists
         START_DATE = datetime.strptime(LAST_DATE, "%Y-%m-%d").strftime("%m/%d/%Y")
     else:  # Then default
         START_DATE = (today - timedelta(days=DEFAULT_START_DAYS)).strftime("%m/%d/%Y")

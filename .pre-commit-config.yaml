@@ -43,6 +43,7 @@ repos:
     rev: v6.2.1
     hooks:
       - id: beautysh
+        exclude: ^eversoureimporter/add_placeholder_state\.sh$
         additional_dependencies:
 #JJK          - setuptools
         - setuptools<81
@@ -60,8 +61,7 @@ repos:
     hooks:
       - id: sync-readme-jjk
         name: Sync README files (JJK)
-        entry: /usr/bin//gh workflow run "Sync README Files (JJK)"
+        entry: ./jjk-sync-readme.sh
         language: system
+        files: (^|/)README\.md$
         pass_filenames: false
-        always_run: true
-        stages: [pre-push, commit]          # or [pre-commit] if you prefer it earlier

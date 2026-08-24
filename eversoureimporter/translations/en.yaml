@@ -30,4 +30,3 @@ configuration:
   offset:
     name: "Bucket Offset"
     description: "Number of seconds from end of quarter-hour bucket to insert placeholders. Should generally be negative integer so that time buckets align properly [default: -15 seconds]"
-   

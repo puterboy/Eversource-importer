@@ -31,7 +31,7 @@ RUN apk add --no-cache \
 ## Sqlite3
     sqlite \
 ## Linux utils
-    bash 
+    bash
 
 WORKDIR /app
 

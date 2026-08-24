@@ -10,9 +10,10 @@
 #
 #===============================================================================
 ## VARIABLES
-export HA_DB="/homeassistant/home-assistant_v2.db"
-export ADDON_NAME="$(bashio::addon.name)"
-export PYTHONUNBUFFERED=1  # Don't buffer output of Python scripts
+HA_DB="/homeassistant/home-assistant_v2.db"
+ADDON_NAME="$(bashio::addon.name)"
+PYTHONUNBUFFERED=1  # Don't buffer output of Python scripts
+export HA_DB ADDON_NAME PYTHONUNBUFFERED
 
 TEST=""
 #TEST="-t" # Uncomment to run routines in test without actually writing to ENERGY_FILE or HA_DB
@@ -27,9 +28,9 @@ log() {
     LEVEL=${LEVEL_%_}  # Strip trailing '_'
     shift
 
-    bashio::log.${LEVEL%_} "$*"
-    if [ "$LEVEL" != "$LEVEL_" ]; then 
-	send_persistent_notification "${LEVEL}: $*"
+    bashio::log."${LEVEL%_}" "$*"
+    if [ "$LEVEL" != "$LEVEL_" ]; then
+        send_persistent_notification "${LEVEL}: $*"
     fi
 }
 
@@ -51,11 +52,11 @@ send_persistent_notification() {
     message="${message//$'\r'/\\r}"
 
     curl -fsS \
-         -X POST \
-         -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
-         -H "Content-Type: application/json" \
-	 -d "{\"notification_id\":\"${ADDON_NAME}-${title}\",\"title\":\"${title}\",\"message\":\"${message}\"}" \
-	 "http://supervisor/core/api/services/persistent_notification/create" >/dev/null	
+        -X POST \
+        -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"notification_id\":\"${ADDON_NAME}-${title}\",\"title\":\"${title}\",\"message\":\"${message}\"}" \
+        "http://supervisor/core/api/services/persistent_notification/create" >/dev/null
 }
 
 ## Get config variables from HA add-on & set environment variables
@@ -160,24 +161,24 @@ while true; do
     UTC_OFFSET=$(( ${UTC_OFFSET:0:1}1 * (10#${UTC_OFFSET:1:2} * 3600 + 10#${UTC_OFFSET:3:2} * 60) ))  # Convert to seconds
 
     NOW="$(date +%s)"
-    
+
     TODAY_MIDNIGHT=$((  ((NOW + UTC_OFFSET)/86400) * 86400 - UTC_OFFSET )) # Today at 12 AM local time
     TODAY_START=$(( TODAY_MIDNIGHT + DOWNLOAD_START ))  # Download start time for today
     NEXT_DAY_START=$(( TODAY_START + 86400 ))  # Download start time for tomorrow
     if [ -n "$FIRST_TIME" ]; then
-       if (( LAST_DOWNLOAD_TIME < TODAY_MIDNIGHT - 60 || LAST_DB_TIME < TODAY_MIDNIGHT - 900 )); then
-	   # Download immediately if no new downloaded data after 11:59 PM yesterday or no valid state after 11:45 PM yesterday
-	   sleep_time=0
-       else  # Already downloaded yesterday's data, wait until download start tomorrow
-	   sleep_time=$(( NEXT_DAY_START - NOW ))
-       fi
+        if (( LAST_DOWNLOAD_TIME < TODAY_MIDNIGHT - 60 || LAST_DB_TIME < TODAY_MIDNIGHT - 900 )); then
+            # Download immediately if no new downloaded data after 11:59 PM yesterday or no valid state after 11:45 PM yesterday
+            sleep_time=0
+        else  # Already downloaded yesterday's data, wait until download start tomorrow
+            sleep_time=$(( NEXT_DAY_START - NOW ))
+        fi
     elif [ "$LAST_DOWNLOAD_TIME" -ge "$TODAY_MIDNIGHT" ]; then  # Already downloaded data today, wait until download start tomorrow
-	sleep_time=$(( NEXT_DAY_START - NOW ))
-    elif [ "$NOW" -lt "$TODAY_START" ]; then  # If before today's start, wait until today's start 
-	sleep_time=$(( TODAY_START - NOW ))
+        sleep_time=$(( NEXT_DAY_START - NOW ))
+    elif [ "$NOW" -lt "$TODAY_START" ]; then  # If before today's start, wait until today's start
+        sleep_time=$(( TODAY_START - NOW ))
     else  # Sleep until next DOWNLOAD_FREQUENCY
-	time_since_start=$(( NOW - TODAY_START ))
-	sleep_time=$(( (time_since_start/DOWNLOAD_FREQUENCY + 1) * DOWNLOAD_FREQUENCY - time_since_start ))
+        time_since_start=$(( NOW - TODAY_START ))
+        sleep_time=$(( (time_since_start/DOWNLOAD_FREQUENCY + 1) * DOWNLOAD_FREQUENCY - time_since_start ))
     fi
     log INFO "Next download attempt: $(date -d @$((NOW + sleep_time)) "+%Y-%m-%d %H:%M:%S %Z") [Last download: $(date -d "@$LAST_DOWNLOAD_TIME" "+%Y-%m-%d %H:%M:%S %Z")]"
     sleep $sleep_time
@@ -187,48 +188,52 @@ while true; do
 
     ## Scrape Eversource site for data
     log INFO "### Running Eversource scraper (PID=$$)"
+    # shellcheck disable=SC2086  # Intentionally not quote $TEST
     /app/eversource_scraper.py $TEST -v -v -s $DAYS_BACK ${ACCOUNT_EVERSOURCE:+-a $ACCOUNT_EVERSOURCE} -f "$ENERGY_FILE"
     status="$?"
-    if [ "$status" -eq 0 ]; then  # New data    
-	LAST_DOWNLOAD_TIME="$(date +%s)"
+    if [ "$status" -eq 0 ]; then  # New data
+        LAST_DOWNLOAD_TIME="$(date +%s)"
     elif [ "$status" -eq 2 ]; then  # No new data
-	log INFO "##### OK: No new energy data downloaded (PID=$$)" 
+        log INFO "##### OK: No new energy data downloaded (PID=$$)"
         [ -z "$FIRST_TIME" ] && continue
     elif [ "$status" -ne 0  ]; then  # Error
-	log ERROR_ "ERROR importing energy data into Home Assistant DB (PID=$$)"
+        log ERROR_ "ERROR importing energy data into Home Assistant DB (PID=$$)"
         [ -z "$FIRST_TIME" ] && continue
     fi
     FIRST_TIME=""
 
     ## Fill in missing placeholders using DONOR_SENSORS
     log INFO "### Checking for missing HA database placeholders using ($DONOR_SENSORS)..."
+    # shellcheck disable=SC2086  # Intentionally not quote $TEST
     /app/insert_missing_placeholders.py  $TEST -v -v -F "$(( -DAYS_BACK ))" -o "$OFFSET" -e "$ENERGY_SENSOR" -E "$DONOR_SENSORS" 2>&1
     status="$?"
     if [ "$status" -ne 0 ]; then
         log ERROR_ "ERROR checking and filling in missing placeholders (PID=$$)"
-	continue
+        continue
     fi
 
-    ## Import energy data into energy state placholders in Home Assistant DB
+    ## Import energy data into energy state placeholders in Home Assistant DB
     log INFO "### Importing energy data into HA database..."
+    # shellcheck disable=SC2086  # Intentionally not quote $TEST
     /app/import_electric_usage.py $TEST -v -e "$ENERGY_SENSOR" -a -f "$ENERGY_FILE"
     status="$?"
     if [ "$status" -eq 2 ]; then  # No new data
-	log INFO "##### OK: No new energy data to import (PID=$$)" 
-	continue
+        log INFO "##### OK: No new energy data to import (PID=$$)"
+        continue
     elif [ "$status" -ne 0  ]; then  # Error
-	log ERROR_ "ERROR importing energy data into Home Assistant DB (PID=$$)"
-	continue
+        log ERROR_ "ERROR importing energy data into Home Assistant DB (PID=$$)"
+        continue
     fi
 
     ## Redo statistics starting from last prior valid statistic
     log INFO "### Updating statistics tables..."
+    # shellcheck disable=SC2086  # Intentionally not quote $TEST
     /app/redo_sum_statistics.py $TEST -v -v -e "$ENERGY_SENSOR"
     status="$?"
     if [ "$status" -ne 0  ]; then  # Error
-	log ERROR_ "ERROR updating statistics tables (PID=$$)"
-	continue
+        log ERROR_ "ERROR updating statistics tables (PID=$$)"
+        continue
     fi
 
-    log INFO "##### SUCCESS: Imported new energy data (PID=$$)" 
+    log INFO "##### SUCCESS: Imported new energy data (PID=$$)"
 done
