@@ -30,7 +30,7 @@ options:
   account_eversource: ""
   energy_file: "/homeassistant/eversource.csv"
   days_back: 7
-  download_start: 1
+  download_start: 2
   download_frequency: 4
   energy_sensor: null
   donor_sensors: null
