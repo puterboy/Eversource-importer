@@ -259,8 +259,7 @@ Below is YAML code for a simple Apex Charts dashboard to navigate the last
 today's data). Drag or compress/expand the shaded box under the axis to
 change the viewport.
 
-!\[Eversource Energy
-Dashboard\](https://raw.githubusercontent.com/puterboy/Eversource-importer/main/eversoureimporter/images/eversource-dashboard.png)
+![Eversource Energy Dashboard](https://raw.githubusercontent.com/puterboy/Eversource-importer/main/eversoureimporter/images/eversource-dashboard.png)
 
 ```
 title: Electricity
